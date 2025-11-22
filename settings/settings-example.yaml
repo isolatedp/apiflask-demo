@@ -1,0 +1,22 @@
+# settings/settings-example.yaml
+# 專案時區
+APP_TZ: "Asia/Taipei"
+
+# Flask 安全編碼
+SECRET_KEY: 
+
+# JWT 設定
+JWT:
+  SECRET_KEY: 
+  ACCESS_TOKEN_MINUTES: 
+  REFRESH_TOKEN_MINUTES: 
+
+# 專案資料庫設定
+DATABASE:
+  DEFAULT:
+    DB_TYPE: 
+    HOST:
+    PORT:
+    USER:
+    PWD:
+    DB_NAME:

@@ -1,0 +1,6 @@
+.venv
+settings/*
+!settings/settings-example.yaml
+!settings/uwsgi.ini
+logs/*
+__pycache__

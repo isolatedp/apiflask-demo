@@ -1,0 +1,6 @@
+FLASK_APP=src/app:create_app
+FLASK_RUN_HOST=0.0.0.0
+FLASK_RUN_PORT=9000
+
+# 運行模式
+APP_MODE=dev
