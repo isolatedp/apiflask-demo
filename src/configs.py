@@ -26,10 +26,8 @@ class ConfigLoader:
         """
         設定專案路徑
         """
-        # 取得當前文件的路徑
-        current_file_path = os.path.dirname(os.path.abspath(__file__))
         # 取得當前文件的父目錄(即程式根目錄)
-        app_path = os.path.dirname(current_file_path)
+        app_path = os.path.dirname(os.path.abspath(__file__))
         # 取得程式根目錄的父目錄(即專案根目錄)
         project_path = os.path.dirname(app_path)
         # 取得設定檔路徑
@@ -54,4 +52,37 @@ class ConfigLoader:
             settings = yaml.safe_load(f)
         return settings
     
-Configs = ConfigLoader().settings
+class Configs:
+    """
+    設定檔
+    """
+    _loader = ConfigLoader()
+    _settings = _loader.settings
+    
+    # 專案環境變數
+    APP_MODE = _loader.app_mode
+    
+    # 專案路徑資訊
+    PROJECT_PATH = _loader.paths["project_path"]
+    APP_PATH = _loader.paths["app_path"]
+    SETTINGS_FILE_PATH = _loader.paths["settings_file_path"]
+    
+    # 專案時區
+    APP_TIMEZONE = _settings.get("APP_TIMEZONE", "Asia/Taipei")
+    
+    # FLASK
+    SECRET_KEY = _settings.get("SECRET_KEY", None)
+    
+    # FLASK-JWT-EXTENDED
+    JWT_SECRET_KEY = _settings.get("JWT_SECRET_KEY", None)
+    JWT_ACCESS_TOKEN_EXPIRES = _settings.get("JWT_ACCESS_TOKEN_EXPIRES", 4 * 60 * 60)
+    JWT_REFRESH_TOKEN_EXPIRES = _settings.get("JWT_REFRESH_TOKEN_EXPIRES", 8 * 60 * 60)
+    
+    # FLASK-CORS
+    CORS_ORIGINS = _settings.get("CORS_ORIGINS", ["*"])
+    
+    # FLASK-SQLALCHEMY
+    
+    # AES 安全編碼
+    AES_SECRET_KEY = _settings.get("AES_SECRET_KEY", None)
+    
