@@ -1,4 +1,5 @@
 # src/services/utils/security_utils.py
+from curses import raw
 import bcrypt, json, hashlib, base64
 
 
@@ -133,3 +134,124 @@ def _verify_hash_for_string(raw_data, hash_data):
     hash_data = hash_data.encode('utf-8')
     result = bcrypt.checkpw(raw_data, hash_data)
     return result
+
+def generate_encryp_aes256(raw_data, secret_key: str, length: int = 32, iterations: int = 10**6):
+    """
+    生成 AES-256 加密字串
+    Args:
+        raw_data: 要加密的原始資料
+        secret_key: 加密密鑰
+        length: 生成的密鑰長度
+        iterations: 雜湊迭代次數
+    Returns:
+        str: AES-256 加密後的字串
+    """
+    process_data = {
+        "datatype": None,
+        "content": raw_data
+    }
+    if isinstance(raw_data, str):
+        process_data["datatype"] = "string"
+    elif isinstance(raw_data, bool):
+        process_data["datatype"] = "bool"
+    elif isinstance(raw_data, int):
+        process_data["datatype"] = "int"
+    elif isinstance(raw_data, float):
+        process_data["datatype"] = "float"
+    elif isinstance(raw_data, list):
+        process_data["datatype"] = "list"
+    elif isinstance(raw_data, dict):
+        process_data["datatype"] = "dict"
+    else:
+        return False
+    
+    process_data = json.dumps(process_data, sort_keys=True)
+    return _generate_encryp_aes256_for_string(process_data, secret_key, length, iterations)
+
+def _generate_encryp_aes256_for_string(raw_data: str, secret_key: str, length: int = 32, iterations: int = 10**6):
+    """
+    生成 AES-256 加密字串
+    """
+    if not isinstance(raw_data, str):
+        return False
+    
+    # 生成指定長度的 salt(16) 與 nonce(12)，用於 AES-256-GCM 加密
+    salt = os.urandom(16)
+    nonce = os.urandom(12)
+    
+    # 使用 PBKDF2HMAC 做加密金鑰處理
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=length,
+        salt=salt,
+        iterations=iterations,
+        backend=default_backend()
+    )
+    secret_key = secret_key.encode('utf-8')
+    secret_key = kdf.derive(secret_key)
+    
+    # 使用 AES-GCM 對明文進行加密
+    aesgcm = AESGCM(secret_key)
+    raw_data = raw_data.encode('utf-8')
+    ciphertext = aesgcm.encrypt(nonce, raw_data, None)
+    
+    # 組合密文 (salt + nonce + ciphertext)
+    encrypted = salt + nonce + ciphertext
+    encrypted = base64.urlsafe_b64encode(encrypted)
+    return encrypted.decode('utf-8')
+
+def recover_encryp_aes256(raw_data: str, secret_key: str, length: int = 32, iterations: int = 10**6):
+    """
+    解密 AES-256 加密的字串
+    """
+    raw_data = raw_data.encode('utf-8')
+    raw_data = base64.urlsafe_b64decode(raw_data)
+    
+    # 解析 salt(16)、nonce(12) 和 ciphertext
+    salt = raw_data[:16]
+    nonce = raw_data[16:28]
+    ciphertext = raw_data[28:]
+    
+    # 使用 PBKDF2HMAC 做加密金鑰處理
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=length,
+        salt=salt,
+        iterations=iterations,
+        backend=default_backend()
+    )
+    secret_key = secret_key.encode('utf-8')
+    secret_key = kdf.derive(secret_key)
+    
+    # 使用 AES-GCM 解密
+    aesgcm = AESGCM(secret_key)
+    decrypted_json = aesgcm.decrypt(nonce, ciphertext, None)
+    decrypted_json = decrypted_json.decode('utf-8')
+    return _recover_datatype(decrypted_json)
+
+def _recover_datatype(raw_data: str):
+    if not isinstance(raw_data, str):
+        return False
+    
+    raw_data = json.loads(raw_data)
+    # 格式確認：檢查是否包含 datatype 和 content 字段
+    datatype = raw_data.get('datatype')
+    content = raw_data.get('content')
+    if datatype is None or "content" not in raw_data:
+        return False
+    
+    if datatype == "string":
+        return content
+    elif datatype == "bool":
+        return content
+    elif datatype == "int":
+        return int(content)
+    elif datatype == "float":
+        return float(content)
+    elif datatype == "list":
+        return content
+    elif datatype == "dict":
+        return content
+    else:
+        return False
+    
