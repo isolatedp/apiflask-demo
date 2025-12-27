@@ -1,0 +1,27 @@
+# settings/settings_example.yaml
+# 專案時區
+APP_TIMEZONE: "Asia/Taipei"
+
+# Flask 安全編碼
+SECRET_KEY: 
+
+# JWT 設定
+JWT_SECRET_KEY: 
+JWT_ACCESS_TOKEN_EXPIRES: 
+JWT_REFRESH_TOKEN_EXPIRES: 
+
+# CORS 白名單
+CORS_ORIGINS: []
+
+# 專案資料庫設定
+DATABASE:
+  DEFAULT:
+    DB_TYPE: 
+    HOST:
+    PORT:
+    USER:
+    PWD:
+    DB_NAME:
+
+# AES 安全編碼
+AES_SECRET_KEY: 
